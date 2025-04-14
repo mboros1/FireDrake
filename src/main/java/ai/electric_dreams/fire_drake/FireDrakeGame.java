@@ -24,15 +24,13 @@ public class FireDrakeGame {
 	private static final Logger logger = LoggerFactory.getLogger(FireDrakeGame.class);
 
 	public static void main(String[] args) {
-		var game = new FireDrakeGame();
-		game.init();
 		new Thread(() -> {
 			SpringApplication app = new SpringApplication(SpringRunner.class);
 			app.setWebApplicationType(WebApplicationType.NONE);
 			app.run(args);
 		}).start();
 
-		game.run();
+		new FireDrakeGame().run();
 	}
 
 	// The window handle
@@ -41,7 +39,7 @@ public class FireDrakeGame {
 	public void run() {
 		System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
-//        init();
+        init();
 		loop();
 
 		// Free the window callbacks and destroy the window
