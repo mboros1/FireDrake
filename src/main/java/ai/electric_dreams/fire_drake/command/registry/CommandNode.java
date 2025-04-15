@@ -1,5 +1,7 @@
 package ai.electric_dreams.fire_drake.command.registry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
@@ -9,17 +11,21 @@ import java.util.Optional;
 
 @Component
 public class CommandNode {
+
+    private static final Logger logger = LoggerFactory.getLogger(CommandNode.class);
     private static volatile CommandNode instance;
     private static volatile TaskExecutor taskExecutor;
     private static ApplicationContext applicationContext;
 
     @Autowired
     public void setApplicationContext(ApplicationContext context) {
+        logger.info("Assigning executor to CommandNode Factory..");
         applicationContext = context;
         taskExecutor = context.getBean(TaskExecutor.class);
     }
 
     private CommandNode() {
+        logger.info("initializing CommandNode Factory..");
         // Private constructor to prevent instantiation
     }
 
