@@ -1,12 +1,17 @@
 package ai.electric_dreams.fire_drake.command.registry;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public class LiteralCommandNode implements CommandTreeNode {
+
+    private static final Logger logger = LoggerFactory.getLogger(LiteralCommandNode.class);
+
     private final String literal;
-    private final Map<String, CommandTreeNode> children = new HashMap<>();
+    private final Map<String, LiteralCommandNode> literalChildren = new HashMap<>();
+    private final List<ArgumentCommandNode> argumentChildren = new ArrayList<>();
     private CommandExecutor executor;
 
 
@@ -18,9 +23,14 @@ public class LiteralCommandNode implements CommandTreeNode {
     @Override
     public void addChild(CommandTreeNode child) {
         if (child instanceof LiteralCommandNode literalChild) {
-            children.put(literalChild.getLiteral(), child);
+            literalChildren.put(literalChild.getLiteral(), literalChild);
+        } else if (child instanceof ArgumentCommandNode argumentChild) {
+            argumentChildren.add(argumentChild);
+        } else {
+            logger.info("Unknown command node: " + child);
         }
     }
+
 
     public String getLiteral() {
         return literal;
@@ -39,13 +49,21 @@ public class LiteralCommandNode implements CommandTreeNode {
             return;
         }
 
-        var next = children.get(tokens[index]);
+        var next = literalChildren.get(tokens[index]);
         if (next != null) {
             next.dispatch(source, tokens, index + 1);
-        } else if (executor != null) {
+            return;
+        }
+
+        for (var argChild : argumentChildren) {
+            argChild.dispatch(source, tokens, index);
+            return;
+        }
+
+        if (executor != null) {
             executor.execute(source, Arrays.copyOfRange(tokens, index, tokens.length));
         } else {
-            source.sendMessage("Unknown command.");
+            source.sendMessage("Unknown command: " + tokens[index]);
         }
     }
 }

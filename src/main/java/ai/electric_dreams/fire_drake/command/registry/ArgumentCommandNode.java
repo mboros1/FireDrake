@@ -1,5 +1,7 @@
 package ai.electric_dreams.fire_drake.command.registry;
 
+import java.util.Arrays;
+
 public class ArgumentCommandNode implements CommandTreeNode {
 
     private final ArgumentParser parser;
@@ -25,8 +27,15 @@ public class ArgumentCommandNode implements CommandTreeNode {
             return;
         }
 
-        Object arg = parser.parse(tokens[index]);
-        executor.execute(source, new Object[]{arg});
+        String[] remaining = Arrays.copyOfRange(tokens, index, tokens.length);
+        Object arg = parser.parse(String.join(" ", remaining));
+
+        if (executor != null) {
+            executor.execute(source, new Object[]{arg});
+        } else {
+            source.sendMessage("Missing execution target.");
+        }
     }
+
 }
 
