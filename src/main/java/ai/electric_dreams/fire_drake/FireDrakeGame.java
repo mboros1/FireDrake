@@ -24,12 +24,16 @@ public class FireDrakeGame {
 	private static final Logger logger = LoggerFactory.getLogger(FireDrakeGame.class);
 
 	public static void main(String[] args) {
+		logger.info("Welcome to Fird Drake!");
+
+		logger.info("Initiating Spring Daemon");
 		new Thread(() -> {
 			SpringApplication app = new SpringApplication(SpringRunner.class);
 			app.setWebApplicationType(WebApplicationType.NONE);
 			app.run(args);
 		}).start();
 
+		logger.info("Launching Game Loop");
 		new FireDrakeGame().run();
 	}
 
@@ -37,8 +41,6 @@ public class FireDrakeGame {
 	private long window;
 
 	public void run() {
-		System.out.println("Hello LWJGL " + Version.getVersion() + "!");
-
         init();
 		loop();
 
@@ -64,6 +66,11 @@ public class FireDrakeGame {
 		glfwDefaultWindowHints(); // optional, the current window hints are already the default
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
+		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 
 		// Create the window
 		window = glfwCreateWindow(300, 300, "Hello World!", NULL, NULL);
@@ -114,7 +121,7 @@ public class FireDrakeGame {
 		GL.createCapabilities();
 
 		// Set the clear color
-		glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
 
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.

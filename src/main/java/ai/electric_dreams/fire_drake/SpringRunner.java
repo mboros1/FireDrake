@@ -1,11 +1,11 @@
 package ai.electric_dreams.fire_drake;
 
+import ai.electric_dreams.fire_drake.command.registry.CommandSource;
+import ai.electric_dreams.fire_drake.command.registry.CommandTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
@@ -13,6 +13,13 @@ import java.util.List;
 @SpringBootApplication
 public class SpringRunner implements ApplicationRunner {
     private static final Logger logger = LoggerFactory.getLogger(SpringRunner.class);
+
+    private final CommandTree registry;
+
+    public SpringRunner(CommandTree registry) {
+        logger.info("Initializing command tree registrar");
+        this.registry = registry;
+    }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -23,5 +30,9 @@ public class SpringRunner implements ApplicationRunner {
         }
 
         logger.info("Positional Arguments: {}", args.getNonOptionArgs());
+
+        CommandSource source = msg -> System.out.println("[GAME] " + msg);
+        registry.dispatch(source, "say hey dude");
+
     }
 }
