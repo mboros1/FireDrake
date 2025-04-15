@@ -1,15 +1,36 @@
 package ai.electric_dreams.fire_drake;
 
 import ai.electric_dreams.fire_drake.command.registry.ArgumentCommandNode;
+import ai.electric_dreams.fire_drake.command.registry.CommandNode;
 import ai.electric_dreams.fire_drake.command.registry.CommandSource;
 import ai.electric_dreams.fire_drake.command.registry.CommandTree;
 import ai.electric_dreams.fire_drake.command.registry.LiteralCommandNode;
+import ai.electric_dreams.fire_drake.configuration.AsyncConfig;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+@SpringBootTest
+@ContextConfiguration(classes = AsyncConfig.class)
 class CommandRegistryTest {
+    
+    @Autowired
+    private TaskExecutor taskExecutor;
+
+    @BeforeEach
+    void setUp() {
+        CommandNode.setTaskExecutorForTesting(taskExecutor);
+    }
 
     @Test
     void shouldDispatchLiteralThenArgumentCommand() {
@@ -17,8 +38,8 @@ class CommandRegistryTest {
 
         CommandTree registry = new CommandTree();
 
-        LiteralCommandNode say = new LiteralCommandNode("say");
-        ArgumentCommandNode message = new ArgumentCommandNode(input -> input);
+        LiteralCommandNode say = CommandNode.literal("say");
+        ArgumentCommandNode message = CommandNode.argument(input -> input);
         message.setExecutor((s, args) -> s.sendMessage((String) args[0]));
 
         say.addChild(message);
@@ -45,14 +66,27 @@ class CommandRegistryTest {
 
         CommandTree registry = new CommandTree();
 
-        LiteralCommandNode say = new LiteralCommandNode("say");
-        ArgumentCommandNode message = new ArgumentCommandNode(input -> input);
+        LiteralCommandNode say = CommandNode.literal("say");
+        ArgumentCommandNode message = CommandNode.argument(input -> input);
         message.setExecutor((s, args) -> s.sendMessage((String) args[0]));
 
         say.addChild(message);
         registry.register(say);
 
         registry.dispatch(source, "say hello hello");
+
+        CountDownLatch latch = new CountDownLatch(1);
+        try {
+            if (!latch.await(1, TimeUnit.SECONDS)) {
+                throw new AssertionError("Command did not complete within timeout");
+            }
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (AssertionError e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         verify(source).sendMessage("hello hello");
     }

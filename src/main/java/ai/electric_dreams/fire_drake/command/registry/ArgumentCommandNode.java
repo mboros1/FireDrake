@@ -1,14 +1,16 @@
 package ai.electric_dreams.fire_drake.command.registry;
 
 import java.util.Arrays;
-
+import org.springframework.core.task.TaskExecutor;
 public class ArgumentCommandNode implements CommandTreeNode {
 
     private final ArgumentParser parser;
+    private final TaskExecutor taskExecutor;
     private CommandExecutor executor;
 
-    public ArgumentCommandNode(ArgumentParser parser) {
+    public ArgumentCommandNode(ArgumentParser parser, TaskExecutor taskExecutor) {
         this.parser = parser;
+        this.taskExecutor = taskExecutor;
     }
 
     @Override
@@ -17,7 +19,8 @@ public class ArgumentCommandNode implements CommandTreeNode {
     }
 
     public void setExecutor(CommandExecutor executor) {
-        this.executor = executor;
+        this.executor = (source, args) -> 
+            taskExecutor.execute(() -> executor.execute(source, args));
     }
 
     @Override
