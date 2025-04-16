@@ -1,5 +1,11 @@
 package ai.electric_dreams.fire_drake;
 
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.flag.ImGuiConfigFlags;
+import imgui.flag.ImGuiWindowFlags;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -23,8 +29,13 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class FireDrakeGame {
 	private static final Logger logger = LoggerFactory.getLogger(FireDrakeGame.class);
 
+	private ImGuiImplGlfw imGuiGlfw;
+	private ImGuiImplGl3 imGuiGl3;
+	private boolean showPopupWindow = false;
+
+
 	public static void main(String[] args) {
-		logger.info("Welcome to Fird Drake!");
+		logger.info("Welcome to Fire Drake!");
 
 		logger.info("Initiating Spring Daemon");
 		new Thread(() -> {
@@ -51,6 +62,7 @@ public class FireDrakeGame {
 		// Terminate GLFW and free the error callback
 		glfwTerminate();
 		glfwSetErrorCallback(null).free();
+		ImGui.destroyContext();
 	}
 
 	void init() {
@@ -104,6 +116,7 @@ public class FireDrakeGame {
 
 		// Make the OpenGL context current
 		glfwMakeContextCurrent(window);
+
 		// Enable v-sync
 		glfwSwapInterval(1);
 
@@ -120,19 +133,60 @@ public class FireDrakeGame {
 		// bindings available for use.
 		GL.createCapabilities();
 
+		glEnable(GL_DEPTH_TEST);
+
 		// Set the clear color
 		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+
+		// Init ImGui context
+		ImGui.createContext();
+		ImGuiIO io = ImGui.getIO();
+		io.setConfigFlags(ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DockingEnable);
+
+		imGuiGlfw = new ImGuiImplGlfw();
+		imGuiGlfw.init(window, true);
+		imGuiGl3  = new ImGuiImplGl3();
+		imGuiGl3.init("#version 330");
 
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.
 		while ( !glfwWindowShouldClose(window) ) {
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
-			glfwSwapBuffers(window); // swap the color buffers
-
-			// Poll for window events. The key callback above will only be
-			// invoked during this call.
 			glfwPollEvents();
+
+			imGuiGlfw.newFrame();
+			imGuiGl3.newFrame();
+			ImGui.newFrame();
+
+			ImGui.begin("Main HUD");
+			if (ImGui.button("Open Window")) {
+				showPopupWindow = true;
+			}
+			ImGui.end();
+
+			if (showPopupWindow) {
+				ImGui.begin("Poppable Window", ImGuiWindowFlags.None);
+				ImGui.text("Here's a floating ImGui window.");
+				if (ImGui.button("Close")) {
+					showPopupWindow = false;
+				}
+				ImGui.end();
+			}
+
+
+			// Render everything
+			ImGui.render();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			imGuiGl3.renderDrawData(ImGui.getDrawData());
+
+			// Render ImGui platform windows (multi-monitor)
+			if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+				final long backupWindow = glfwGetCurrentContext();
+				ImGui.updatePlatformWindows();
+				ImGui.renderPlatformWindowsDefault();
+				glfwMakeContextCurrent(backupWindow);
+			}
+
+			glfwSwapBuffers(window);
 		}
 	}
 }

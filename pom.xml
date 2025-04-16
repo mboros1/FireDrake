@@ -31,6 +31,7 @@
         <spring-ai.version>1.0.0-M7</spring-ai.version>
         <spring-shell.version>3.4.0</spring-shell.version>
         <lwjgl.version>3.3.6</lwjgl.version>
+        <joml.version>1.10.5</joml.version>
     </properties>
 
     <profiles>
@@ -126,6 +127,23 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>io.github.spair</groupId>
+            <artifactId>imgui-java-binding</artifactId>
+            <version>1.89.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.spair</groupId>
+            <artifactId>imgui-java-lwjgl3</artifactId>
+            <version>1.89.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.spair</groupId>
+            <artifactId>imgui-java-natives-macos</artifactId>
+            <version>1.89.0</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl</artifactId>
@@ -502,6 +520,11 @@
             <groupId>org.springframework.shell</groupId>
             <artifactId>spring-shell-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.joml</groupId>
+            <artifactId>joml</artifactId>
+            <version>${joml.version}</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
