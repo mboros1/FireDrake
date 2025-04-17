@@ -1,5 +1,6 @@
 package ai.electric_dreams.fire_drake;
 
+import ai.electric_dreams.fire_drake.gfx.PsxForwardRenderer;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiConfigFlags;
@@ -131,6 +132,9 @@ public class FireDrakeGame {
 		// creates the GLCapabilities instance and makes the OpenGL
 		// bindings available for use.
 		GL.createCapabilities();
+		renderer = new PsxForwardRenderer();
+		renderer.init(window);
+
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -151,6 +155,16 @@ public class FireDrakeGame {
 		// the window or has pressed the ESCAPE key.
 		while ( !glfwWindowShouldClose(window) ) {
 			glfwPollEvents();
+
+			renderer.beginFrame();
+
+			/* === game world draw calls === */
+			for (var e : world.visible()) {
+				renderer.draw(e.mesh(), e.material(), e.transform());
+			}
+			/* === end draw === */
+
+			renderer.endFrame();
 
 			imGuiGlfw.newFrame();
 			imGuiGl3.newFrame();

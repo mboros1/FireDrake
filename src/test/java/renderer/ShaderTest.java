@@ -1,10 +1,9 @@
 package renderer;
 
+import ai.electric_dreams.fire_drake.gfx.Shader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 

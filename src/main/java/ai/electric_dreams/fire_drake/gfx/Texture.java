@@ -1,4 +1,4 @@
-package renderer;
+package ai.electric_dreams.fire_drake.gfx;
 
 public class Texture {
     private int id;

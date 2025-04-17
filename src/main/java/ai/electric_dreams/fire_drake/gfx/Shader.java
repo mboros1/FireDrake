@@ -1,4 +1,4 @@
-package renderer;
+package ai.electric_dreams.fire_drake.gfx;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
