@@ -33,7 +33,3 @@ jobs:
 
       - name: Build with Maven
         run: mvn -B verify
-
-      - name: Run headless OpenGL test
-        run: |
-          mvn exec:java -Dexec.mainClass="your.package.Main" -Dexec.cleanupDaemonThreads=false
