@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
@@ -68,25 +70,17 @@ class CommandRegistryTest {
 
         LiteralCommandNode say = CommandNode.literal("say");
         ArgumentCommandNode message = CommandNode.argument(input -> input);
+
+        // TODO: setting the task executor to be single threaded to simplify the testing
+        var singleThreadTaskExecutor = new SyncTaskExecutor();
+        CommandNode.setTaskExecutorForTesting(singleThreadTaskExecutor);
+
         message.setExecutor((s, args) -> s.sendMessage((String) args[0]));
 
         say.addChild(message);
         registry.register(say);
 
         registry.dispatch(source, "say hello hello");
-
-        CountDownLatch latch = new CountDownLatch(1);
-        try {
-            if (!latch.await(1, TimeUnit.SECONDS)) {
-                throw new AssertionError("Command did not complete within timeout");
-            }
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (AssertionError e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
         verify(source).sendMessage("hello hello");
     }
