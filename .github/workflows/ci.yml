@@ -1,0 +1,35 @@
+name: Test OpenGL Headless (Java 24 + Maven)
+
+on:
+  push:
+    paths: [ '**.java', '**/pom.xml', '.github/workflows/**' ]
+  pull_request:
+    paths: [ '**.java', '**/pom.xml', '.github/workflows/**' ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 24
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 24
+          cache: maven
+
+      - name: Install OpenGL and GLFW dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libgl1-mesa-dev libglu1-mesa-dev xorg-dev libglfw3-dev
+
+      - name: Build with Maven
+        run: mvn -B verify
+
+      - name: Run headless OpenGL test
+        run: |
+          # Optional: export DISPLAY=:99 if you set up Xvfb
+          mvn exec:java -Dexec.mainClass="your.package.Main" -Dexec.cleanupDaemonThreads=false
