@@ -18,16 +18,12 @@ import org.springframework.test.context.ContextConfiguration;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 @SpringBootTest
 @ContextConfiguration(classes = AsyncConfig.class)
 class CommandRegistryTest {
-    
-    @Autowired
-    private TaskExecutor taskExecutor;
+
+    // TODO: setting the task executor to be single threaded to simplify the testing
+    private TaskExecutor taskExecutor = new SyncTaskExecutor();
 
     @BeforeEach
     void setUp() {
@@ -71,9 +67,6 @@ class CommandRegistryTest {
         LiteralCommandNode say = CommandNode.literal("say");
         ArgumentCommandNode message = CommandNode.argument(input -> input);
 
-        // TODO: setting the task executor to be single threaded to simplify the testing
-        var singleThreadTaskExecutor = new SyncTaskExecutor();
-        CommandNode.setTaskExecutorForTesting(singleThreadTaskExecutor);
 
         message.setExecutor((s, args) -> s.sendMessage((String) args[0]));
 
