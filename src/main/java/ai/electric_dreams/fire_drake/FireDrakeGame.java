@@ -1,6 +1,7 @@
 package ai.electric_dreams.fire_drake;
 
 import ai.electric_dreams.fire_drake.gfx.PsxForwardRenderer;
+import ai.electric_dreams.fire_drake.gfx.Renderer;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiConfigFlags;
@@ -32,6 +33,8 @@ public class FireDrakeGame {
 	private ImGuiImplGlfw imGuiGlfw;
 	private ImGuiImplGl3 imGuiGl3;
 	private boolean showPopupWindow = false;
+	private Renderer renderer;
+	private World world;
 
 
 	public static void main(String[] args) {
@@ -134,6 +137,9 @@ public class FireDrakeGame {
 		GL.createCapabilities();
 		renderer = new PsxForwardRenderer();
 		renderer.init(window);
+		
+		// Initialize the game world
+		world = new World();
 
 
 		glEnable(GL_DEPTH_TEST);
