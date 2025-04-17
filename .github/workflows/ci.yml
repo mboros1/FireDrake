@@ -21,10 +21,13 @@ jobs:
           java-version: 24
           cache: maven
 
-      - name: Install OpenGL and GLFW dependencies
+      - name: Start X virtual framebuffer
         run: |
           sudo apt update
-          sudo apt install -y libgl1-mesa-dev libglu1-mesa-dev xorg-dev libglfw3-dev
+          sudo apt install -y xvfb libgl1-mesa-dev libglu1-mesa-dev libglfw3-dev
+          Xvfb :99 -screen 0 1024x768x24 &
+          export DISPLAY=:99
+
 
       - name: Build with Maven
         run: mvn -B verify
