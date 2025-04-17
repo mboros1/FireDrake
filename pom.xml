@@ -32,9 +32,60 @@
         <spring-shell.version>3.4.0</spring-shell.version>
         <lwjgl.version>3.3.6</lwjgl.version>
         <joml.version>1.10.5</joml.version>
+        <imgui.natives>imgui-java-natives-macos</imgui.natives>
     </properties>
 
     <profiles>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+            </activation>
+            <properties>
+                <imgui.natives>imgui-java-natives-linux</imgui.natives>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>macos-arm64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <imgui.natives>imgui-java-natives-macos</imgui.natives>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>macos-intel</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <properties>
+                <imgui.natives>imgui-java-natives-macos</imgui.natives>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <imgui.natives>imgui-java-natives-windows</imgui.natives>
+            </properties>
+        </profile>
         <profile>
             <id>lwjgl-natives-linux-amd64</id>
             <activation>
@@ -133,7 +184,7 @@
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>io.github.spair</groupId>
             <artifactId>imgui-java-binding</artifactId>
@@ -146,7 +197,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.spair</groupId>
-            <artifactId>imgui-java-natives-macos</artifactId>
+            <artifactId>${imgui.natives}</artifactId>
             <version>1.89.0</version>
             <scope>runtime</scope>
         </dependency>
