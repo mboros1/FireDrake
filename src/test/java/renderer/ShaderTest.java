@@ -3,10 +3,13 @@ package renderer;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL33.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -41,6 +44,11 @@ class ShaderTest {
 
     @BeforeAll
     static void setUp() {
+        assumeFalse(System.getProperty("os.name").toLowerCase().contains("mac"),
+                "Skipping ShaderTest on macOS because of context-on-thread-0 requirement");
+
+
+
         // Initialize GLFW and create a window
         if (!GLFW.glfwInit()) {
             throw new RuntimeException("Unable to initialize GLFW");
