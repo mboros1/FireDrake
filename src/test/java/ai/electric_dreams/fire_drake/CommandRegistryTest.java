@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 class CommandRegistryTest {
 
     // TODO: setting the task executor to be single threaded to simplify the testing
-    private TaskExecutor taskExecutor = new SyncTaskExecutor();
+    private final TaskExecutor taskExecutor = new SyncTaskExecutor();
 
     @BeforeEach
     void setUp() {
