@@ -5,7 +5,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
@@ -88,17 +87,6 @@ public final class PsxForwardRenderer implements Renderer {
         }
     }
 
-    private String fullscreenVert() {
-        return "#version 330 core\n" +
-               "layout (location = 0) in vec2 aPos;\n" +
-               "layout (location = 1) in vec2 aTexCoord;\n" +
-               "out vec2 TexCoord;\n" +
-               "void main() {\n" +
-               "    gl_Position = vec4(aPos, 0.0, 1.0);\n" +
-               "    TexCoord = aTexCoord;\n" +
-               "}\n";
-    }
-
     @Override
     public void init(long win) {
         this.window = win;
@@ -121,12 +109,12 @@ public final class PsxForwardRenderer implements Renderer {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         psxShader  = Shader.builder("psx")
-                .vertexFromFile("shaders/psx.vert")
-                .fragmentFromFile("shaders/psx.frag")
+                .vertexFromResource("shaders/psx.vert")
+                .fragmentFromResource("shaders/psx.frag")
                 .build();
         postShader = Shader.builder("post")
-                .vertexFromMemory(fullscreenVert())
-                .fragmentFromFile("shaders/post_dither.frag")
+                .vertexFromResource("shaders/fullscreen.vert")
+                .fragmentFromResource("shaders/post_dither.frag")
                 .build();
                 
         fullscreenVao = new FullscreenQuad();

@@ -17,41 +17,40 @@ public class Shader {
     private final String name;
     private final Map<String, Integer> uniformLocationCache = new HashMap<>();
 
-    private Shader(String name, ShaderSource vertexShader, ShaderSource fragmentShader) {
+    private Shader(String name, ShaderSource vertexSrc, ShaderSource fragmentSrc) {
         this.name = name;
-        programId = glCreateProgram();
-        matrixBuffer = BufferUtils.createFloatBuffer(16);
+        this.programId   = glCreateProgram();
+        this.matrixBuffer = BufferUtils.createFloatBuffer(16);
 
         try {
-            int vertexShaderId = compileShader(vertexShader, GL_VERTEX_SHADER);
-            int fragmentShaderId = compileShader(fragmentShader, GL_FRAGMENT_SHADER);
+            int vId = compileShader("vertex",   vertexSrc,   GL_VERTEX_SHADER);
+            int fId = compileShader("fragment", fragmentSrc, GL_FRAGMENT_SHADER);
 
-            glAttachShader(programId, vertexShaderId);
-            glAttachShader(programId, fragmentShaderId);
+            glAttachShader(programId, vId);
+            glAttachShader(programId, fId);
             glLinkProgram(programId);
-
             checkProgramLinkStatus();
 
-            // Delete shaders as they're linked into the program and no longer necessary
-            glDeleteShader(vertexShaderId);
-            glDeleteShader(fragmentShaderId);
+            // Shaders no longer needed after linking
+            glDeleteShader(vId);
+            glDeleteShader(fId);
+
         } catch (Exception e) {
             throw new RuntimeException("Shader [" + name + "] compilation failed: " + e.getMessage());
         }
     }
 
-    private int compileShader(ShaderSource source, int type) {
-        int shaderId = glCreateShader(type);
-        
-        glShaderSource(shaderId, source.getSource());
-        glCompileShader(shaderId);
+    private int compileShader(String stageLabel, ShaderSource src, int glType) {
+        int id = glCreateShader(glType);
+        glShaderSource(id, src.getSource());
+        glCompileShader(id);
 
-        if (glGetShaderi(shaderId, GL_COMPILE_STATUS) == GL_FALSE) {
-            String log = glGetShaderInfoLog(shaderId);
-            throw new RuntimeException("Shader compilation failed:\n" + log);
+        if (glGetShaderi(id, GL_COMPILE_STATUS) == GL_FALSE) {
+            String log = glGetShaderInfoLog(id);
+            throw new RuntimeException(
+                    "Stage '" + stageLabel + "' failed to compile:\n" + log);
         }
-
-        return shaderId;
+        return id;
     }
 
     private void checkProgramLinkStatus() {
@@ -146,11 +145,21 @@ public class Shader {
             return this;
         }
 
+        public ShaderBuilder vertexFromResource(String path) {
+            this.vertexShader = Optional.of(ShaderSource.fromResource(path));
+            return this;
+        }
+
+        public ShaderBuilder fragmentFromResource(String path) {
+            this.fragmentShader = Optional.of(ShaderSource.fromResource(path));
+            return this;
+        }
+
         public Shader build() {
             ShaderSource vertex = vertexShader.orElseThrow(() -> 
-                new IllegalStateException("Vertex shader source not provided"));
+                new IllegalStateException("Vertex shader source not provided, Shader: [" + name + "]"));
             ShaderSource fragment = fragmentShader.orElseThrow(() -> 
-                new IllegalStateException("Fragment shader source not provided"));
+                new IllegalStateException("Fragment shader source not provided, Shader: [" + name + "]"));
             return new Shader(name, vertex, fragment);
         }
     }
