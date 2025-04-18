@@ -60,7 +60,7 @@ public final class DefaultDebugMeshes {
         return new EasyMesh(verts, indices, textures);
     }
 
-    private static Mesh defaultTriangle() {
+    public static Mesh defaultTriangle() {
         float[] vertices = {
                 // positions         // colors
                 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // bottom right

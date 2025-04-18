@@ -8,6 +8,7 @@ public interface Renderer {
     void beginFrame();
     void draw(Mesh mesh, Material mat, Matrix4f model);
     void endFrame();
-    void resize(int width, int height);
     void destroy();
+
+    void draw(Mesh testTriangle);
 }

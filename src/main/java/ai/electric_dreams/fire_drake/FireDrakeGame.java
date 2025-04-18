@@ -147,37 +147,6 @@ public class FireDrakeGame {
 		// Initialize the game world
 		world = new World();
 
-		// -- Test red material setup (copied from your test) --
-		int tex = glGenTextures();
-		Debug.glCheckError("FireDrakeGame.loop - gen texture");
-		
-		glBindTexture(GL_TEXTURE_2D, tex);
-		Debug.glCheckError("FireDrakeGame.loop - bind texture");
-		
-		ByteBuffer red = BufferUtils.createByteBuffer(4).put(new byte[]{ (byte)255, 0, 0, (byte)255 });
-		red.flip();
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, red);
-		Debug.glCheckError("FireDrakeGame.loop - texImage2D");
-		
-		// Add all necessary texture parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		Debug.glCheckError("FireDrakeGame.loop - texParameteri");
-		
-		redMat = new Material(tex);
-
-		// Fullscreen quad
-        Mesh testQuad = DefaultDebugMeshes.fullscreenQuad();
-
-		glEnable(GL_DEPTH_TEST);
-		Debug.glCheckError("FireDrakeGame.loop - enable depth test");
-
-		// Set the clear color
-		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
-		Debug.glCheckError("FireDrakeGame.loop - clear color");
-
 		// Init ImGui context
 		ImGui.createContext();
 		ImGuiIO io = ImGui.getIO();
@@ -188,11 +157,17 @@ public class FireDrakeGame {
 		imGuiGl3  = new ImGuiImplGl3();
 		imGuiGl3.init("#version 330");
 
+		var testTriangle = DefaultDebugMeshes.defaultTriangle();
+
 
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.
 		while ( !glfwWindowShouldClose(window) ) {
 			glfwPollEvents();
+
+			// set background to grey
+			glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 
 			renderer.beginFrame();
 
@@ -201,7 +176,7 @@ public class FireDrakeGame {
 				renderer.draw(e.mesh(), e.material(), e.transform());
 			}
 			// TEMPORARY: show red quad
-			renderer.draw(testQuad, redMat, new Matrix4f().identity());
+			renderer.draw(testTriangle);
 
 			/* === end draw === */
 
