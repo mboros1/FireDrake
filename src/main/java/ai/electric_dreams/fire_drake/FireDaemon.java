@@ -11,12 +11,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.List;
 
 @SpringBootApplication
-public class SpringRunner implements ApplicationRunner {
-    private static final Logger logger = LoggerFactory.getLogger(SpringRunner.class);
+public class FireDaemon implements ApplicationRunner {
+    private static final Logger logger = LoggerFactory.getLogger(FireDaemon.class);
 
     private final CommandTree registry;
 
-    public SpringRunner(CommandTree registry) {
+    public FireDaemon(CommandTree registry) {
         logger.info("Initializing command tree registrar");
         this.registry = registry;
     }
