@@ -1,5 +1,6 @@
 package util;
 
+import ai.electric_dreams.fire_drake.gfx.Debug;
 import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -18,6 +19,7 @@ public final class GpuTestUtil {
         window = glfwCreateWindow(2, 2, "", NULL, NULL);
         glfwMakeContextCurrent(window);
         GL.createCapabilities();
+        Debug.glCheckError("GpuTestUtil.initGlfw - create capabilities");
     }
     public static void shutdown() {
         glfwDestroyWindow(window);

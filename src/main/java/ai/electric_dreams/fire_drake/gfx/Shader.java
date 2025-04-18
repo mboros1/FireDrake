@@ -20,6 +20,7 @@ public class Shader {
     private Shader(String name, ShaderSource vertexSrc, ShaderSource fragmentSrc) {
         this.name = name;
         this.programId   = glCreateProgram();
+        Debug.glCheckError("Shader.constructor - create program: " + name);
         this.matrixBuffer = BufferUtils.createFloatBuffer(16);
 
         try {
@@ -27,13 +28,18 @@ public class Shader {
             int fId = compileShader("fragment", fragmentSrc, GL_FRAGMENT_SHADER);
 
             glAttachShader(programId, vId);
+            Debug.glCheckError("Shader.constructor - attach vertex shader: " + name);
             glAttachShader(programId, fId);
+            Debug.glCheckError("Shader.constructor - attach fragment shader: " + name);
             glLinkProgram(programId);
+            Debug.glCheckError("Shader.constructor - link program: " + name);
             checkProgramLinkStatus();
 
             // Shaders no longer needed after linking
             glDeleteShader(vId);
+            Debug.glCheckError("Shader.constructor - delete vertex shader: " + name);
             glDeleteShader(fId);
+            Debug.glCheckError("Shader.constructor - delete fragment shader: " + name);
 
         } catch (Exception e) {
             throw new RuntimeException("Shader [" + name + "] compilation failed: " + e.getMessage());
@@ -42,8 +48,11 @@ public class Shader {
 
     private int compileShader(String stageLabel, ShaderSource src, int glType) {
         int id = glCreateShader(glType);
+        Debug.glCheckError("Shader.compileShader - create shader: " + stageLabel);
         glShaderSource(id, src.getSource());
+        Debug.glCheckError("Shader.compileShader - set source: " + stageLabel);
         glCompileShader(id);
+        Debug.glCheckError("Shader.compileShader - compile: " + stageLabel);
 
         if (glGetShaderi(id, GL_COMPILE_STATUS) == GL_FALSE) {
             String log = glGetShaderInfoLog(id);
@@ -62,10 +71,12 @@ public class Shader {
 
     public void bind() {
         glUseProgram(programId);
+        Debug.glCheckError("Shader.bind: " + name);
     }
 
     public void unbind() {
         glUseProgram(0);
+        Debug.glCheckError("Shader.unbind");
     }
 
     public int getProgramId() {
@@ -76,6 +87,7 @@ public class Shader {
         int location = getUniformLocation(name);
         if (location != -1) {
             glUniform1f(location, value);
+            Debug.glCheckError("Shader.setFloat: " + name);
         }
     }
 
@@ -83,6 +95,7 @@ public class Shader {
         int location = getUniformLocation(name);
         if (location != -1) {
             glUniform1i(location, value);
+            Debug.glCheckError("Shader.setInt: " + name);
         }
     }
 
@@ -90,6 +103,7 @@ public class Shader {
         int location = getUniformLocation(name);
         if (location != -1) {
             glUniform3f(location, value.x, value.y, value.z);
+            Debug.glCheckError("Shader.setVector3f: " + name);
         }
     }
 
@@ -98,6 +112,7 @@ public class Shader {
         if (location != -1) {
             matrix.get(matrixBuffer);
             glUniformMatrix4fv(location, false, matrixBuffer);
+            Debug.glCheckError("Shader.setMatrix4f: " + name);
         }
     }
 
@@ -109,6 +124,7 @@ public class Shader {
         unbind();
         if (programId != 0) {
             glDeleteProgram(programId);
+            Debug.glCheckError("Shader.cleanup: " + name);
         }
     }
 

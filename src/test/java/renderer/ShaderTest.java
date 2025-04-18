@@ -1,5 +1,6 @@
 package renderer;
 
+import ai.electric_dreams.fire_drake.gfx.Debug;
 import ai.electric_dreams.fire_drake.gfx.Shader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -72,6 +73,7 @@ class ShaderTest {
         // Make OpenGL context current
         glfwMakeContextCurrent(window);
         GL.createCapabilities();
+        Debug.glCheckError("ShaderTest.setUp - create capabilities");
     }
     
     @AfterAll
@@ -99,6 +101,7 @@ class ShaderTest {
             .build();
             
         shader.bind();
+        Debug.glCheckError("ShaderTest.testUniformSetters - bind shader");
         
         // Test setting uniforms
         assertDoesNotThrow(() -> {
@@ -111,6 +114,8 @@ class ShaderTest {
         
         // Verify uniform locations are cached
         int colorLocation = glGetUniformLocation(shader.getProgramId(), "color");
+        Debug.glCheckError("ShaderTest.testUniformSetters - get uniform location");
+        
         assertTrue(colorLocation >= 0, "Color uniform location should be valid");
         
         shader.cleanup();
@@ -138,10 +143,12 @@ class ShaderTest {
             .build();
             
         shader.bind();
+        Debug.glCheckError("ShaderTest.testMissingUniforms - bind shader");
         
         // Setting a non-existent uniform should not throw but should return -1 for location
         shader.setFloat("nonexistent", 1.0f);
         assertEquals(-1, glGetUniformLocation(shader.getProgramId(), "nonexistent"));
+        Debug.glCheckError("ShaderTest.testMissingUniforms - get uniform location");
         
         shader.cleanup();
     }

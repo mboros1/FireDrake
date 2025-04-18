@@ -1,5 +1,6 @@
 package renderer;
 
+import ai.electric_dreams.fire_drake.gfx.Debug;
 import ai.electric_dreams.fire_drake.gfx.Material;
 import ai.electric_dreams.fire_drake.gfx.Mesh;
 import ai.electric_dreams.fire_drake.gfx.MeshFactory;
@@ -41,11 +42,22 @@ class RendererPixelTest {
 
         // 1×1 red texture
         int tex = glGenTextures();
+        Debug.glCheckError("RendererPixelTest.setup - gen texture");
+        
         glBindTexture(GL_TEXTURE_2D, tex);
+        Debug.glCheckError("RendererPixelTest.setup - bind texture");
+        
         ByteBuffer red = BufferUtils.createByteBuffer(4).put(new byte[]{ (byte)255,0,0,(byte)255 });
         red.flip();
         glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,1,1,0,GL_RGBA,GL_UNSIGNED_BYTE,red);
+        Debug.glCheckError("RendererPixelTest.setup - texImage2D");
+        
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        Debug.glCheckError("RendererPixelTest.setup - texParameter");
+        
         redMat = new Material(tex);
 
         quad = MeshFactory.fullscreenQuad();   // two triangles covering NDC
@@ -66,7 +78,11 @@ class RendererPixelTest {
         // read centre pixel of low‑res FBO (320×240) → redMat is solid red
         ByteBuffer pixel = BufferUtils.createByteBuffer(4);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);           // default FB after endFrame up‑scale
+        Debug.glCheckError("RendererPixelTest.redQuadProducesRedPixel - bind framebuffer");
+        
         glReadPixels(2, 2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+        Debug.glCheckError("RendererPixelTest.redQuadProducesRedPixel - read pixels");
+        
         int r = pixel.get(0) & 0xFF;
         int g = pixel.get(1) & 0xFF;
 

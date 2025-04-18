@@ -1,13 +1,14 @@
 package ai.electric_dreams.fire_drake;
 
-import ai.electric_dreams.fire_drake.gfx.PsxForwardRenderer;
-import ai.electric_dreams.fire_drake.gfx.Renderer;
+import ai.electric_dreams.fire_drake.gfx.*;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -35,6 +37,9 @@ public class FireDrakeGame {
 	private boolean showPopupWindow = false;
 	private Renderer renderer;
 	private World world;
+
+    private Material redMat;
+
 
 
 	public static void main(String[] args) {
@@ -135,17 +140,44 @@ public class FireDrakeGame {
 		// creates the GLCapabilities instance and makes the OpenGL
 		// bindings available for use.
 		GL.createCapabilities();
+		Debug.glCheckError("FireDrakeGame.loop - create capabilities");
+		
 		renderer = new PsxForwardRenderer();
 		renderer.init(window);
 		
 		// Initialize the game world
 		world = new World();
 
+		// -- Test red material setup (copied from your test) --
+		int tex = glGenTextures();
+		Debug.glCheckError("FireDrakeGame.loop - gen texture");
+		
+		glBindTexture(GL_TEXTURE_2D, tex);
+		Debug.glCheckError("FireDrakeGame.loop - bind texture");
+		
+		ByteBuffer red = BufferUtils.createByteBuffer(4).put(new byte[]{ (byte)255, 0, 0, (byte)255 });
+		red.flip();
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, red);
+		Debug.glCheckError("FireDrakeGame.loop - texImage2D");
+		
+		// Add all necessary texture parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		Debug.glCheckError("FireDrakeGame.loop - texParameteri");
+		
+		redMat = new Material(tex);
+
+		// Fullscreen quad
+        Mesh testQuad = MeshFactory.fullscreenQuad();
 
 		glEnable(GL_DEPTH_TEST);
+		Debug.glCheckError("FireDrakeGame.loop - enable depth test");
 
 		// Set the clear color
 		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+		Debug.glCheckError("FireDrakeGame.loop - clear color");
 
 		// Init ImGui context
 		ImGui.createContext();
@@ -168,6 +200,9 @@ public class FireDrakeGame {
 			for (var e : world.visible()) {
 				renderer.draw(e.mesh(), e.material(), e.transform());
 			}
+			// TEMPORARY: show red quad
+			renderer.draw(testQuad, redMat, new Matrix4f().identity());
+
 			/* === end draw === */
 
 			renderer.endFrame();
@@ -194,8 +229,9 @@ public class FireDrakeGame {
 
 			// Render everything
 			ImGui.render();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			imGuiGl3.renderDrawData(ImGui.getDrawData());
+			Debug.glCheckError("FireDrakeGame.loop - render ImGui");
 
 			// Render ImGui platform windows (multi-monitor)
 			if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
@@ -203,9 +239,11 @@ public class FireDrakeGame {
 				ImGui.updatePlatformWindows();
 				ImGui.renderPlatformWindowsDefault();
 				glfwMakeContextCurrent(backupWindow);
+				Debug.glCheckError("FireDrakeGame.loop - render ImGui viewports");
 			}
 
 			glfwSwapBuffers(window);
+			Debug.glCheckError("FireDrakeGame.loop - swap buffers");
 		}
 	}
 }

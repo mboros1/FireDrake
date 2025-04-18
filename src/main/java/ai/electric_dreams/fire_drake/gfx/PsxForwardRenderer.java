@@ -2,12 +2,15 @@ package ai.electric_dreams.fire_drake.gfx;
 
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GLDebugMessageCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_OUTPUT;
+import static org.lwjgl.opengl.KHRDebug.glDebugMessageCallback;
 
 public final class PsxForwardRenderer implements Renderer {
     private Shader psxShader;
@@ -38,6 +41,7 @@ public final class PsxForwardRenderer implements Renderer {
         void bind() {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, mat.textureId());
+            Debug.glCheckError("DrawCmd.bind");
         }
     }
 
@@ -49,9 +53,11 @@ public final class PsxForwardRenderer implements Renderer {
             // Create a VAO for a fullscreen quad (two triangles)
             vao = glGenVertexArrays();
             vbo = glGenBuffers();
+            Debug.glCheckError("FullscreenQuad.init - gen buffers");
 
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            Debug.glCheckError("FullscreenQuad.init - bind buffers");
 
             // A single quad made of two triangles (6 vertices)
             float[] vertices = {
@@ -64,6 +70,7 @@ public final class PsxForwardRenderer implements Renderer {
             };
 
             glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+            Debug.glCheckError("FullscreenQuad.init - buffer data");
 
             // Position attribute
             glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
@@ -71,19 +78,25 @@ public final class PsxForwardRenderer implements Renderer {
             // Texture coordinate attribute
             glVertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
             glEnableVertexAttribArray(1);
+            Debug.glCheckError("FullscreenQuad.init - set attributes");
 
             glBindVertexArray(0);
+            Debug.glCheckError("FullscreenQuad.init - unbind VAO");
         }
 
         public void draw() {
             glBindVertexArray(vao);
+            Debug.glCheckError("FullscreenQuad.draw - bind VAO");
             glDrawArrays(GL_TRIANGLES, 0, 6);
+            Debug.glCheckError("FullscreenQuad.draw - draw arrays");
             glBindVertexArray(0);
+            Debug.glCheckError("FullscreenQuad.draw - unbind VAO");
         }
 
         public void cleanup() {
             glDeleteVertexArrays(vao);
             glDeleteBuffers(vbo);
+            Debug.glCheckError("FullscreenQuad.cleanup");
         }
     }
 
@@ -93,30 +106,65 @@ public final class PsxForwardRenderer implements Renderer {
         // --- low‑res FBO ---
         colorTex = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, colorTex);
+        Debug.glCheckError("PsxForwardRenderer.init - gen and bind texture");
+        
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 320, 240, 0,
                 GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        Debug.glCheckError("PsxForwardRenderer.init - texImage2D");
+
+        // Add proper texture parameters for the framebuffer texture
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        Debug.glCheckError("PsxForwardRenderer.init - texture parameters");
 
         depthRb = glGenRenderbuffers();
         glBindRenderbuffer(GL_RENDERBUFFER, depthRb);
+        Debug.glCheckError("PsxForwardRenderer.init - gen and bind renderbuffer");
+        
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 320, 240);
+        Debug.glCheckError("PsxForwardRenderer.init - renderbuffer storage");
 
         lowResFbo = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, lowResFbo);
+        Debug.glCheckError("PsxForwardRenderer.init - gen and bind framebuffer");
+        
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_2D, colorTex, 0);
+        Debug.glCheckError("PsxForwardRenderer.init - framebuffer texture");
+        
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                 GL_RENDERBUFFER, depthRb);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        Debug.glCheckError("PsxForwardRenderer.init - framebuffer renderbuffer");
+        
+        // Check if framebuffer is complete
+        int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            throw new RuntimeException("Framebuffer is not complete! Status: 0x" + Integer.toHexString(status));
+        }
+        Debug.glCheckError("PsxForwardRenderer.init - check framebuffer status");
 
-        psxShader  = Shader.builder("psx")
-                .vertexFromResource("shaders/psx.vert")
-                .fragmentFromResource("shaders/psx.frag")
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        Debug.glCheckError("PsxForwardRenderer.init - unbind framebuffer");
+
+//        psxShader  = Shader.builder("psx")
+//                .vertexFromResource("shaders/psx.vert")
+//                .fragmentFromResource("shaders/psx.frag")
+//                .build();
+//        postShader = Shader.builder("post")
+//                .vertexFromResource("shaders/fullscreen.vert")
+//                .fragmentFromResource("shaders/post_dither.frag")
+//                .build();
+        psxShader  = Shader.builder("debug1")
+                .vertexFromResource("shaders/debug.vert")
+                .fragmentFromResource("shaders/debug.frag")
                 .build();
-        postShader = Shader.builder("post")
-                .vertexFromResource("shaders/fullscreen.vert")
-                .fragmentFromResource("shaders/post_dither.frag")
+        postShader = Shader.builder("debug2")
+                .vertexFromResource("shaders/debug.vert")
+                .fragmentFromResource("shaders/debug.frag")
                 .build();
-                
+
         fullscreenVao = new FullscreenQuad();
     }
 
@@ -124,8 +172,13 @@ public final class PsxForwardRenderer implements Renderer {
     public void beginFrame() {
         drawQueue.clear();
         glBindFramebuffer(GL_FRAMEBUFFER, lowResFbo);
+        Debug.glCheckError("PsxForwardRenderer.beginFrame - bind framebuffer");
+        
         glViewport(0, 0, 320, 240);
+        Debug.glCheckError("PsxForwardRenderer.beginFrame - viewport");
+        
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Debug.glCheckError("PsxForwardRenderer.beginFrame - clear");
     }
 
     @Override
@@ -136,33 +189,59 @@ public final class PsxForwardRenderer implements Renderer {
     @Override
     public void endFrame() {
         psxShader.bind();
+        Debug.glCheckError("PsxForwardRenderer.endFrame - bind psx shader");
+        
         psxShader.setMatrix4f("view", view);
         psxShader.setMatrix4f("projection", proj);
+        Debug.glCheckError("PsxForwardRenderer.endFrame - set matrices");
         
         for (DrawCmd cmd : drawQueue) {
             cmd.bind();
             psxShader.setMatrix4f("model", cmd.model);
             psxShader.setInt("texture_diffuse1", 0);
             cmd.mesh.draw(psxShader);
+            Debug.glCheckError("PsxForwardRenderer.endFrame - draw mesh");
         }
         psxShader.unbind();
+        Debug.glCheckError("PsxForwardRenderer.endFrame - unbind psx shader");
 
         // post‑process to default framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        Debug.glCheckError("PsxForwardRenderer.endFrame - bind default framebuffer");
+        
         int[] width = new int[1];
         int[] height = new int[1];
         GLFW.glfwGetFramebufferSize(window, width, height);
         glViewport(0, 0, width[0], height[0]);
+        Debug.glCheckError("PsxForwardRenderer.endFrame - viewport");
+        
         glDisable(GL_DEPTH_TEST);
+        Debug.glCheckError("PsxForwardRenderer.endFrame - disable depth test");
 
         postShader.bind();
+        Debug.glCheckError("PsxForwardRenderer.endFrame - bind post shader");
+        
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, colorTex);
-        postShader.setInt("screenTexture", 0);
+        Debug.glCheckError("PsxForwardRenderer.endFrame - bind texture");
+        
+        postShader.setInt("uScene", 0);
         fullscreenVao.draw();
         postShader.unbind();
+        Debug.glCheckError("PsxForwardRenderer.endFrame - post process");
         
         glEnable(GL_DEPTH_TEST);
+        Debug.glCheckError("PsxForwardRenderer.endFrame - enable depth test");
+
+        // After drawing scene into lowResFbo
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, lowResFbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);           // the window
+        glBlitFramebuffer(
+                0, 0, 320, 240,
+                0, 0, 320, 240,                             // or window size
+                GL_COLOR_BUFFER_BIT,
+                GL_NEAREST);
+
     }
 
     @Override 
@@ -182,5 +261,6 @@ public final class PsxForwardRenderer implements Renderer {
         glDeleteFramebuffers(lowResFbo);
         glDeleteTextures(colorTex);
         glDeleteRenderbuffers(depthRb);
+        Debug.glCheckError("PsxForwardRenderer.destroy");
     }
 }
