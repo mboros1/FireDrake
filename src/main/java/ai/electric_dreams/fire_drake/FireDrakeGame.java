@@ -1,6 +1,7 @@
 package ai.electric_dreams.fire_drake;
 
 import ai.electric_dreams.fire_drake.gfx.*;
+import ai.electric_dreams.fire_drake.gfx.mesh.EasyMesh;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiConfigFlags;
@@ -168,7 +169,7 @@ public class FireDrakeGame {
 		redMat = new Material(tex);
 
 		// Fullscreen quad
-        Mesh testQuad = MeshFactory.fullscreenQuad();
+        Mesh testQuad = DefaultDebugMeshes.fullscreenQuad();
 
 		glEnable(GL_DEPTH_TEST);
 		Debug.glCheckError("FireDrakeGame.loop - enable depth test");
@@ -186,6 +187,7 @@ public class FireDrakeGame {
 		imGuiGlfw.init(window, true);
 		imGuiGl3  = new ImGuiImplGl3();
 		imGuiGl3.init("#version 330");
+
 
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.

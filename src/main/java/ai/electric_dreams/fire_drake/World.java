@@ -5,7 +5,6 @@ import ai.electric_dreams.fire_drake.gfx.Entity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Represents the game world containing all visible entities.

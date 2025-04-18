@@ -1,5 +1,6 @@
 package ai.electric_dreams.fire_drake.gfx;
 
+import ai.electric_dreams.fire_drake.gfx.mesh.EasyMesh;
 import org.joml.Matrix4f;
 
 public interface Renderer {

@@ -1,16 +1,14 @@
 package ai.electric_dreams.fire_drake.gfx;
 
+import ai.electric_dreams.fire_drake.gfx.mesh.EasyMesh;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GLDebugMessageCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_OUTPUT;
-import static org.lwjgl.opengl.KHRDebug.glDebugMessageCallback;
 
 public final class PsxForwardRenderer implements Renderer {
     private Shader psxShader;
@@ -19,7 +17,6 @@ public final class PsxForwardRenderer implements Renderer {
     private Matrix4f view = new Matrix4f(), proj = new Matrix4f();
     private List<DrawCmd> drawQueue = new ArrayList<>();
     private long window;
-    private FullscreenQuad fullscreenVao;
 
     private static class DrawCmd {
         final Mesh mesh;
@@ -45,6 +42,53 @@ public final class PsxForwardRenderer implements Renderer {
         }
     }
 
+    private static class Triangle {
+        int vaoId;
+        int vboId;
+        int eboId;
+
+        public static Triangle generateDefault() {
+            Triangle triangle = new Triangle();
+            float[] vertices = {
+                    // x, y, z
+                    0.5f,  0.5f, 0.0f, // top right
+                    0.5f, -0.5f, 0.0f, // bottom right
+                    -0.5f, -0.5f, 0.0f, // bottom left
+                    -0.5f,  0.5f, 0.0f  // top left
+            };
+
+            int[] indices = {
+                    0, 1, 3, // first triangle
+                    1, 2, 3  // second triangle
+            };
+
+// --- VAO ---
+            triangle.vaoId = glGenVertexArrays();
+            glBindVertexArray(triangle.vaoId);
+
+// --- VBO ---
+            triangle.vboId = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, triangle.vboId);
+            glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+
+// --- EBO (optional, only if using indices) ---
+            triangle.eboId = glGenBuffers();
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangle.eboId);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+
+// --- Attribute Pointer for aPos at location 0 ---
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0);
+            glEnableVertexAttribArray(0);
+
+// --- Unbind (optional safety) ---
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+
+            return triangle;
+        }
+
+    }
+
     private static class FullscreenQuad {
         private int vao;
         private int vbo;
@@ -68,6 +112,7 @@ public final class PsxForwardRenderer implements Renderer {
                  1.0f,  1.0f, 1.0f, 1.0f,
                 -1.0f,  1.0f, 0.0f, 1.0f
             };
+
 
             glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
             Debug.glCheckError("FullscreenQuad.init - buffer data");
@@ -148,24 +193,23 @@ public final class PsxForwardRenderer implements Renderer {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         Debug.glCheckError("PsxForwardRenderer.init - unbind framebuffer");
 
-//        psxShader  = Shader.builder("psx")
-//                .vertexFromResource("shaders/psx.vert")
-//                .fragmentFromResource("shaders/psx.frag")
-//                .build();
+        psxShader  = Shader.builder("psx")
+                .vertexFromResource("shaders/psx.vert")
+                .fragmentFromResource("shaders/psx.frag")
+                .build();
 //        postShader = Shader.builder("post")
 //                .vertexFromResource("shaders/fullscreen.vert")
 //                .fragmentFromResource("shaders/post_dither.frag")
 //                .build();
-        psxShader  = Shader.builder("debug1")
-                .vertexFromResource("shaders/debug.vert")
-                .fragmentFromResource("shaders/debug.frag")
-                .build();
-        postShader = Shader.builder("debug2")
-                .vertexFromResource("shaders/debug.vert")
-                .fragmentFromResource("shaders/debug.frag")
-                .build();
+//        psxShader  = Shader.builder("debug1")
+//                .vertexFromResource("shaders/debug.vert")
+//                .fragmentFromResource("shaders/debug.frag")
+//                .build();
+//        postShader = Shader.builder("debug2")
+//                .vertexFromResource("shaders/psx.vert")
+//                .fragmentFromResource("shaders/psx.frag")
+//                .build();
 
-        fullscreenVao = new FullscreenQuad();
     }
 
     @Override
@@ -218,30 +262,20 @@ public final class PsxForwardRenderer implements Renderer {
         glDisable(GL_DEPTH_TEST);
         Debug.glCheckError("PsxForwardRenderer.endFrame - disable depth test");
 
-        postShader.bind();
-        Debug.glCheckError("PsxForwardRenderer.endFrame - bind post shader");
+//        postShader.bind();
+//        Debug.glCheckError("PsxForwardRenderer.endFrame - bind post shader");
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, colorTex);
         Debug.glCheckError("PsxForwardRenderer.endFrame - bind texture");
         
-        postShader.setInt("uScene", 0);
-        fullscreenVao.draw();
-        postShader.unbind();
-        Debug.glCheckError("PsxForwardRenderer.endFrame - post process");
+//        postShader.setInt("uScene", 0);
+//        fullscreenVao.draw();
+//        postShader.unbind();
+//        Debug.glCheckError("PsxForwardRenderer.endFrame - post process");
         
         glEnable(GL_DEPTH_TEST);
         Debug.glCheckError("PsxForwardRenderer.endFrame - enable depth test");
-
-        // After drawing scene into lowResFbo
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, lowResFbo);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);           // the window
-        glBlitFramebuffer(
-                0, 0, 320, 240,
-                0, 0, 320, 240,                             // or window size
-                GL_COLOR_BUFFER_BIT,
-                GL_NEAREST);
-
     }
 
     @Override 
@@ -256,8 +290,7 @@ public final class PsxForwardRenderer implements Renderer {
     @Override 
     public void destroy() { 
         psxShader.cleanup(); 
-        postShader.cleanup();
-        fullscreenVao.cleanup();
+//        postShader.cleanup();
         glDeleteFramebuffers(lowResFbo);
         glDeleteTextures(colorTex);
         glDeleteRenderbuffers(depthRb);

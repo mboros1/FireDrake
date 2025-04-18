@@ -2,8 +2,6 @@ package ai.electric_dreams.fire_drake.gfx;
 
 import org.joml.Matrix4f;
 
-import java.util.Optional;
-
 /**
  * Represents a visible entity in the game world.
  */

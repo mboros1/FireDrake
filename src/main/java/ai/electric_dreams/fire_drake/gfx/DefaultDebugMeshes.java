@@ -1,13 +1,14 @@
 package ai.electric_dreams.fire_drake.gfx;
 
+import ai.electric_dreams.fire_drake.gfx.mesh.ArrayMesh;
+import ai.electric_dreams.fire_drake.gfx.mesh.EasyMesh;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-public final class MeshFactory {
+public final class DefaultDebugMeshes {
 
     private static Mesh FULLSCREEN;
 
@@ -56,9 +57,24 @@ public final class MeshFactory {
         // No material/texture needed here; your post shader binds the scene tex.
         List<Texture> textures = Collections.emptyList();
 
-        return new Mesh(verts, indices, textures);
+        return new EasyMesh(verts, indices, textures);
     }
 
-    private MeshFactory() {}   // utility class
+    private static Mesh defaultTriangle() {
+        float[] vertices = {
+                // positions         // colors
+                0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // bottom right
+                -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // bottom left
+                0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f   // top
+        };
+
+        int[] indices = {
+                0, 1, 2
+        };
+
+        return new ArrayMesh(vertices, indices);
+    }
+
+    private DefaultDebugMeshes() {}   // utility class
 }
 
