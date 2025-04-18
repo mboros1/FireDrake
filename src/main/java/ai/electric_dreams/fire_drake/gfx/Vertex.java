@@ -18,6 +18,19 @@ public class Vertex {
         this.bitangent = new Vector3f();
     }
 
+    public Vertex(Vector3f position,
+                  Vector3f normal,
+                  Vector2f texCoords,
+                  Vector3f tangent,
+                  Vector3f bitangent) {
+        this.position  = new Vector3f(position);
+        this.normal    = new Vector3f(normal);
+        this.texCoords = new Vector2f(texCoords);
+        this.tangent   = new Vector3f(tangent);
+        this.bitangent = new Vector3f(bitangent);
+    }
+
+
     public Vector3f getPosition() {
         return position;
     }
