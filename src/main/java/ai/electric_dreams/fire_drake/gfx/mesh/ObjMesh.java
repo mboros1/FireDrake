@@ -14,11 +14,9 @@ public class ObjMesh implements Mesh {
 
     private static Logger logger = LoggerFactory.getLogger(ObjMesh.class);
 
-    record FaceVertex(int v, int vt, int vn) {
-    }
+    record FaceVertex(int v, int vt, int vn) { }
 
-    record Face(List<FaceVertex> vertices) {
-    }
+    record Face(List<FaceVertex> vertices) { }
 
     private final List<float[]> vertices = new ArrayList<>();
     private final List<float[]> norms = new ArrayList<>();
