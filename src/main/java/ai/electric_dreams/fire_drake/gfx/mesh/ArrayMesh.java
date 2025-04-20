@@ -31,6 +31,8 @@ public class ArrayMesh implements Mesh {
     public void draw(Shader shader) {
         glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+        Debug.glCheckError("ArrayMesh.draw - unbind VAO");
     }
 
     @Override

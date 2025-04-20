@@ -33,3 +33,4 @@ build/
 .vscode/
 /fire-drake.log
 imgui.ini
+*.log
