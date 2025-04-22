@@ -1,11 +1,18 @@
+// debug.vert
 #version 330 core
-layout(location = 0) in vec3 aPos;   // Fullscreen quad position
-layout(location = 1) in vec2 aUV;    // Fullscreen quad UVs
+layout (location = 0) in vec3 aPos;   // Position
+layout (location = 1) in vec3 aColor; // Color
 
-out vec2 vUV;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-void main()
-{
-    gl_Position = vec4(aPos.xy, 0.0, 1.0); // already clip‑space
-    vUV = aUV;
+out vec4 vertexColor; // Pass color to fragment shader
+
+void main() {
+    mat4 mvp = projection * view * model;
+    gl_Position = mvp * vec4(aPos, 1.0);
+    
+    // Use the input color directly
+    vertexColor = vec4(aColor, 1.0);
 }

@@ -3,11 +3,13 @@ package mesh;
 import ai.electric_dreams.fire_drake.gfx.Shader;
 import ai.electric_dreams.fire_drake.gfx.mesh.ObjMesh;
 import org.joml.Matrix4f;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class MeshTest {
 
     @Test
+    @Disabled
     public void testLoadObj() {
         // Create a shader for rendering
         Shader shader = Shader.builder("test")

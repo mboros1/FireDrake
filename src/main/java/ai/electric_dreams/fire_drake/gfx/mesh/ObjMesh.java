@@ -237,11 +237,8 @@ public class ObjMesh implements Mesh {
         if (vao == 0) {
             return; // No mesh data
         }
+        shader.bind();
 
-        // Set model matrix if it's not already set
-        // This ensures the mesh is visible even if the renderer doesn't set matrices
-        shader.setMatrix4f("model", new org.joml.Matrix4f().identity());
-        
         glBindVertexArray(vao);
         Debug.glCheckError("ObjMesh.draw - bind VAO");
         

@@ -131,7 +131,7 @@ public class Shader {
         if (location != -1) {
             matrix.get(matrixBuffer);
             glUniformMatrix4fv(location, false, matrixBuffer);
-            Debug.glCheckError("Shader.setMatrix4f: " + name);
+            Debug.glCheckError("Shader["+this.name+"].setMatrix4f: " + name);
         }
     }
 

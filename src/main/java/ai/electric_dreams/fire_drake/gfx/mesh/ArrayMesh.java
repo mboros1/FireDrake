@@ -60,7 +60,7 @@ public class ArrayMesh implements Mesh {
         glEnableVertexAttribArray(0);
 
         // Color attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, false, 6 * Float.BYTES, 3L);
+        glVertexAttribPointer(1, 3, GL_FLOAT, false, 6 * Float.BYTES, 3 * Float.BYTES);
         glEnableVertexAttribArray(1);
 
         // Unbind for safety (optional but common)
