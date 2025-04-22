@@ -2,10 +2,13 @@ package ai.electric_dreams.fire_drake.gfx;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.system.MemoryStack;
 
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.glfw.GLFW.glfwGetFramebufferSize;
 import static org.lwjgl.glfw.GLFW.glfwSetFramebufferSizeCallback;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
@@ -37,6 +40,22 @@ public final class PsxForwardRenderer implements Renderer {
         }
     }
 
+    public int getFbWidth() {
+        return fbWidth;
+    }
+
+    public int getFbHeight() {
+        return fbHeight;
+    }
+
+    public Matrix4f getView() {
+        return view;
+    }
+
+    public Matrix4f getProj() {
+        return proj;
+    }
+
     @Override
     public void init(long win) {
         this.window = win;
@@ -47,6 +66,13 @@ public final class PsxForwardRenderer implements Renderer {
             fbHeight = height;
             glViewport(0, 0, width, height);
         });
+        try ( MemoryStack stack = MemoryStack.stackPush() ) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            glfwGetFramebufferSize(window, w, h);
+            fbWidth  = w.get(0);
+            fbHeight = h.get(0);
+        }
 
         // Load shaders
         psxShader = Shader.builder("psx")

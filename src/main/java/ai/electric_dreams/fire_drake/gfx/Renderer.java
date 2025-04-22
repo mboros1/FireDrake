@@ -11,4 +11,11 @@ public interface Renderer {
     void destroy();
 
     void draw(Mesh testTriangle);
+
+    int getFbWidth();
+    int getFbHeight();
+
+    Matrix4f getView();
+
+    Matrix4f getProj();
 }

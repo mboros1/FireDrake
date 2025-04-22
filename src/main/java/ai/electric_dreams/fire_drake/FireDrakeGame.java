@@ -26,6 +26,7 @@ public class FireDrakeGame {
 	private Renderer renderer;
 	private World world;
 	private boolean showPopupWindow = false;
+	private ObjMesh dragonMesh;
 
 	public static void main(String[] args) {
 		logger.info("Welcome to Fire Drake!");
@@ -68,7 +69,7 @@ public class FireDrakeGame {
 		// Initialize game world
 		world = new World();
 
-		var dragonMesh = new ObjMesh("fire_drake.obj");
+		dragonMesh = new ObjMesh("fire_drake.obj");
 		dragonMesh.reportObjStats();
 		Matrix4f model = new Matrix4f()
 				.translate(0, -1, -5)   // move it down 1 unit and back 5 units
@@ -93,7 +94,7 @@ public class FireDrakeGame {
 		renderer.init(windowHandle);
 
 		// Get a test mesh for rendering
-		// var testTriangle = DefaultDebugMeshes.defaultTriangle();
+		 var testTriangle = DefaultDebugMeshes.defaultTriangle();
 
 		// Main loop
 		while (!windowSystem.shouldClose()) {
@@ -108,7 +109,7 @@ public class FireDrakeGame {
 				renderer.draw(e.mesh(), e.material(), e.transform());
 			}
 			// TEMPORARY: show test triangle
-			// renderer.draw(testTriangle);
+			 renderer.draw(testTriangle);
 			renderer.endFrame();
 
 			// ImGui rendering
@@ -119,6 +120,40 @@ public class FireDrakeGame {
 			if (ImGui.button("Open Window")) {
 				showPopupWindow = true;
 			}
+
+
+// 3) pull whatever stats you want
+			ImGui.text(String.format("FPS: %.1f", ImGui.getIO().getFramerate()));
+			ImGui.text(String.format("Frame Time: %.2f ms", 1000.0f / ImGui.getIO().getFramerate()));
+			ImGui.separator();
+
+// your tracked framebuffer size
+			ImGui.text("Framebuffer: " + renderer.getFbWidth() + "×" + renderer.getFbHeight());
+			ImGui.text(String.format("Aspect: %.3f", (float)renderer.getFbWidth() / renderer.getFbHeight()));
+			ImGui.separator();
+
+// camera/view/proj
+			float[] m = new float[16];
+			renderer.getView().get(m);
+			ImGui.text("View Matrix:");
+			for (int row = 0; row < 4; row++) {
+				ImGui.text(String.format(
+						"%6.2f %6.2f %6.2f %6.2f",
+						m[row*4+0], m[row*4+1], m[row*4+2], m[row*4+3]
+				));
+			}
+			ImGui.separator();
+
+			renderer.getProj().get(m);
+			ImGui.text("Proj Matrix:");
+			for (int row = 0; row < 4; row++) {
+				ImGui.text(String.format(
+						"%6.2f %6.2f %6.2f %6.2f",
+						m[row*4+0], m[row*4+1], m[row*4+2], m[row*4+3]
+				));
+			}
+			ImGui.separator();
+
 			ImGui.end();
 
 			// Popup window if enabled
