@@ -18,4 +18,6 @@ public interface Renderer {
     Matrix4f getView();
 
     Matrix4f getProj();
+
+    void gameToCameraUpdates(float radius, float yawRad, float pitchRad);
 }

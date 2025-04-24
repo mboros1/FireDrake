@@ -68,6 +68,21 @@ public final class PsxForwardRenderer implements Renderer {
         return proj;
     }
 
+    public void setCameraPosition(Vector3f newPos) {
+        cameraPos.set(newPos);
+        view.identity().lookAt(cameraPos, cameraTarget, up);
+    }
+
+
+    @Override
+    public void gameToCameraUpdates(float radius, float yawRad, float pitchRad) {
+        // Spherical to Cartesian conversion
+        float x = (float)(radius * Math.cos(pitchRad) * Math.sin(yawRad));
+        float y = (float)(radius * Math.sin(pitchRad));
+        float z = (float)(radius * Math.cos(pitchRad) * Math.cos(yawRad));
+        setCameraPosition(new Vector3f(x, y, z));
+    }
+
     @Override
     public void init(long win) {
         this.window = win;

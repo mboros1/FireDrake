@@ -29,6 +29,14 @@ public class FireDrakeGame {
 	private boolean showPopupWindow = false;
 	private ObjMesh dragonMesh;
 
+	// Camera controls
+	private boolean leftMouseDown = false;
+	private double lastMouseX = -1;
+	private double lastMouseY = -1;
+	private float yaw = 0.0f;
+	private float pitch = 0.0f;
+	private float zoom = 5.0f; // distance from camera to target
+
 	public static void main(String[] args) {
 		logger.info("Welcome to Fire Drake!");
 
@@ -82,8 +90,43 @@ public class FireDrakeGame {
 		var triangleEntity = new Entity(triangleMesh, null, new Matrix4f().identity());
 		world.addEntity(triangleEntity);
 
+		initMouseCallbacks(windowHandle);
+
 		// Make the window visible
 		windowSystem.show();
+	}
+
+	private void initMouseCallbacks(long windowHandle) {
+
+		GLFW.glfwSetMouseButtonCallback(windowHandle, (win, button, action, mods) -> {
+			if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+				leftMouseDown = (action == GLFW.GLFW_PRESS);
+			}
+		});
+		GLFW.glfwSetCursorPosCallback(windowHandle, (win, xpos, ypos) -> {
+			if (!leftMouseDown) {
+				lastMouseX = xpos;
+				lastMouseY = ypos;
+				return;
+			}
+
+			double dx = xpos - lastMouseX;
+			double dy = ypos - lastMouseY;
+
+			// Adjust sensitivity as needed
+			yaw   += dx * 0.1f;
+			pitch += dy * 0.1f;
+			pitch = Math.max(-89.9f, Math.min(89.9f, pitch)); // Clamp pitch
+
+			lastMouseX = xpos;
+			lastMouseY = ypos;
+		});
+
+		GLFW.glfwSetScrollCallback(windowHandle, (win, xoffset, yoffset) -> {
+			zoom -= yoffset * 0.5f;
+			zoom = Math.max(1.0f, Math.min(zoom, 50.0f)); // Clamp zoom
+		});
+
 	}
 
 	private void loop() {
@@ -100,19 +143,10 @@ public class FireDrakeGame {
 		// Main loop
 		while (!windowSystem.shouldClose()) {
 			org.lwjgl.glfw.GLFW.glfwPollEvents();
-
-			if (GLFW.glfwGetKey(windowSystem.handle(), GLFW.GLFW_KEY_LEFT) == GLFW.GLFW_PRESS) {
-				// Move camera left
-			}
-			if (GLFW.glfwGetKey(windowSystem.handle(), GLFW.GLFW_KEY_RIGHT) == GLFW.GLFW_PRESS) {
-				// Move camera right
-			}
-			if (GLFW.glfwGetKey(windowSystem.handle(), GLFW.GLFW_KEY_UP) == GLFW.GLFW_PRESS) {
-				// Move camera forward
-			}
-			if (GLFW.glfwGetKey(windowSystem.handle(), GLFW.GLFW_KEY_DOWN) == GLFW.GLFW_PRESS) {
-				// Move camera backward
-			}
+			float radius = zoom;
+			float yawRad = (float)Math.toRadians(yaw);
+			float pitchRad = (float)Math.toRadians(pitch);
+			renderer.gameToCameraUpdates(radius, yawRad, pitchRad);
 
 
 			// Clear the backbuffer
