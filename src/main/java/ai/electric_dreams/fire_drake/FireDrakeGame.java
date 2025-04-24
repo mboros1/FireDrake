@@ -9,6 +9,7 @@ import ai.electric_dreams.fire_drake.window.GlfwWindow;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import org.joml.Matrix4f;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -99,6 +100,20 @@ public class FireDrakeGame {
 		// Main loop
 		while (!windowSystem.shouldClose()) {
 			org.lwjgl.glfw.GLFW.glfwPollEvents();
+
+			if (GLFW.glfwGetKey(windowSystem.handle(), GLFW.GLFW_KEY_LEFT) == GLFW.GLFW_PRESS) {
+				// Move camera left
+			}
+			if (GLFW.glfwGetKey(windowSystem.handle(), GLFW.GLFW_KEY_RIGHT) == GLFW.GLFW_PRESS) {
+				// Move camera right
+			}
+			if (GLFW.glfwGetKey(windowSystem.handle(), GLFW.GLFW_KEY_UP) == GLFW.GLFW_PRESS) {
+				// Move camera forward
+			}
+			if (GLFW.glfwGetKey(windowSystem.handle(), GLFW.GLFW_KEY_DOWN) == GLFW.GLFW_PRESS) {
+				// Move camera backward
+			}
+
 
 			// Clear the backbuffer
 			glContext.clearBuffers();

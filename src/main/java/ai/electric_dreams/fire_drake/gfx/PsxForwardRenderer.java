@@ -19,10 +19,22 @@ public final class PsxForwardRenderer implements Renderer {
     private int lowResFbo = 0; // Initialize to 0 (default framebuffer)
     private int colorTex = 0;
     private int depthRb = 0;
-    private Matrix4f view = new Matrix4f(), proj = new Matrix4f();
+    private Matrix4f view = new Matrix4f();
+    private Matrix4f proj = new Matrix4f();
     private List<DrawCmd> drawQueue = new ArrayList<>();
     private long window;
     private int fbWidth, fbHeight;
+
+    // camera fields
+    private Vector3f cameraPos;
+    private Vector3f cameraTarget;
+    private Vector3f up;
+
+    public void moveCamera(Vector3f delta) {
+        cameraPos.add(delta);
+        cameraTarget.add(delta);
+        view.identity().lookAt(cameraPos, cameraTarget, up);
+    }
 
     private static class DrawCmd {
         final Mesh mesh;
@@ -91,9 +103,10 @@ public final class PsxForwardRenderer implements Renderer {
     }
 
     private void initView() {
-        // camera at (0,2,5) looking at origin
-        view.identity()
-                .lookAt(new Vector3f(0,2,5), new Vector3f(0,0,0), new Vector3f(0,1,0));
+        cameraPos = new Vector3f(0,2,5);
+        cameraTarget = new Vector3f(0, 0, 0);
+        up = new Vector3f(0, 1, 0);
+        view.identity().lookAt(cameraPos, cameraTarget, up);
     }
 
     private void updateProjection() {
