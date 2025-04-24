@@ -219,6 +219,12 @@ public class FireDrakeGame {
 					" %6.2f %6.2f %6.2f",
 					cameraPos.x, cameraPos.y, cameraPos.z
 			));
+			ImGui.separator();
+
+			float distance = cameraPos.distance(dragonPos);
+			ImGui.text("Camera-to-Dragon Distance: " + distance);
+
+			ImGui.separator();
 
 
 
