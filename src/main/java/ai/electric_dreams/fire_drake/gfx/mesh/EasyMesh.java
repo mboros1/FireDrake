@@ -1,6 +1,7 @@
 package ai.electric_dreams.fire_drake.gfx.mesh;
 
 import ai.electric_dreams.fire_drake.gfx.*;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -153,4 +154,17 @@ public class EasyMesh implements Mesh {
         glDeleteBuffers(ebo);
         Debug.glCheckError("Mesh.cleanup");
     }
+
+    @Override
+    public Vector3f getCenter() {
+        Vector3f min = new Vector3f(Float.POSITIVE_INFINITY);
+        Vector3f max = new Vector3f(Float.NEGATIVE_INFINITY);
+
+        for (Vertex v : vertices) {
+            min.min(v.getPosition());
+            max.max(v.getPosition());
+        }
+        return min.add(max).mul(0.5f); // Center of bounding box
+    }
+
 } 

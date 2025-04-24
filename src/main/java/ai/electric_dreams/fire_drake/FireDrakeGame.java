@@ -36,6 +36,7 @@ public class FireDrakeGame {
 	private float yaw = 0.0f;
 	private float pitch = 0.0f;
 	private float zoom = 5.0f; // distance from camera to target
+	private Entity dragonEntity;
 
 	public static void main(String[] args) {
 		logger.info("Welcome to Fire Drake!");
@@ -83,7 +84,7 @@ public class FireDrakeGame {
 		Matrix4f model = new Matrix4f()
 				.translate(0, -1, -5)   // move it down 1 unit and back 5 units
 				.scale(0.1f);           // shrink it to 10%
-		var dragonEntity = new Entity(dragonMesh, null, model);
+		dragonEntity = new Entity(dragonMesh, null, model);
 		world.addEntity(dragonEntity);
 
 		var triangleMesh = DefaultDebugMeshes.defaultTriangle();
@@ -136,6 +137,7 @@ public class FireDrakeGame {
 		// Initialize renderer
 		renderer = new PsxForwardRenderer();
 		renderer.init(windowHandle);
+		renderer.setPlayer(dragonEntity);
 
 		// Get a test mesh for rendering
 		 var testTriangle = DefaultDebugMeshes.defaultTriangle();

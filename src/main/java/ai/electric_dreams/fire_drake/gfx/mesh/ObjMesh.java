@@ -3,6 +3,8 @@ package ai.electric_dreams.fire_drake.gfx.mesh;
 import ai.electric_dreams.fire_drake.gfx.Debug;
 import ai.electric_dreams.fire_drake.gfx.Mesh;
 import ai.electric_dreams.fire_drake.gfx.Shader;
+import ai.electric_dreams.fire_drake.gfx.Vertex;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -261,4 +263,18 @@ public class ObjMesh implements Mesh {
             Debug.glCheckError("ObjMesh.cleanup");
         }
     }
+
+    @Override
+    public Vector3f getCenter() {
+        Vector3f min = new Vector3f(Float.POSITIVE_INFINITY);
+        Vector3f max = new Vector3f(Float.NEGATIVE_INFINITY);
+
+        for (float[] v : vertices) {
+            Vector3f vertex = new Vector3f(v[0], v[1], v[2]);
+            min.min(vertex);
+            max.max(vertex);
+        }
+        return min.add(max).mul(0.5f); // Center of bounding box
+    }
+
 }

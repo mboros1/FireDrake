@@ -1,6 +1,7 @@
 package ai.electric_dreams.fire_drake.gfx;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 /**
  * Represents a visible entity in the game world.
@@ -15,6 +16,12 @@ public class Entity {
         this.material = material;
         this.transform = transform;
     }
+
+    public Vector3f getWorldCenter() {
+        Vector3f localCenter = mesh.getCenter();
+        return transform.transformPosition(localCenter);
+    }
+
 
     public Mesh mesh() {
         return mesh;

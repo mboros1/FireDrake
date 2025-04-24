@@ -3,6 +3,7 @@ package ai.electric_dreams.fire_drake.gfx.mesh;
 import ai.electric_dreams.fire_drake.gfx.Debug;
 import ai.electric_dreams.fire_drake.gfx.Mesh;
 import ai.electric_dreams.fire_drake.gfx.Shader;
+import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
@@ -66,5 +67,18 @@ public class ArrayMesh implements Mesh {
         // Unbind for safety (optional but common)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+    }
+
+    @Override
+    public Vector3f getCenter() {
+        Vector3f min = new Vector3f(Float.POSITIVE_INFINITY);
+        Vector3f max = new Vector3f(Float.NEGATIVE_INFINITY);
+
+        for (int i = 0; i < vertices.length; i += 6) {
+            Vector3f v = new Vector3f(vertices[i], vertices[i+1], vertices[i+2]);
+            min.min(v);
+            max.max(v);
+        }
+        return min.add(max).mul(0.5f);
     }
 }

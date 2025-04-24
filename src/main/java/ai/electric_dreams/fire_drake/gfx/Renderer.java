@@ -12,6 +12,8 @@ public interface Renderer {
 
     void draw(Mesh testTriangle);
 
+    void setPlayer(Entity player);
+
     int getFbWidth();
     int getFbHeight();
 
