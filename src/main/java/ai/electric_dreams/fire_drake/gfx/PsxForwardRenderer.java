@@ -30,11 +30,27 @@ public final class PsxForwardRenderer implements Renderer {
     private Vector3f cameraTarget;
     private Vector3f up;
 
+    private boolean forward;
+    private boolean left;
+    private boolean backward;
+    private boolean right;
+
     private Entity player;
+    private final Vector3f front = new Vector3f(0, 0, 1);
 
     @Override
     public Vector3f getCameraPos() {
         return cameraPos;
+    }
+
+    @Override
+    public void setCameraTarget(Vector3f worldCenter) {
+        cameraTarget = worldCenter;
+    }
+
+    @Override
+    public Vector3f getCameraTarget() {
+        return cameraTarget;
     }
 
     @Override
@@ -91,12 +107,11 @@ public final class PsxForwardRenderer implements Renderer {
     @Override
     public void gameToCameraUpdates(float radius, float yawRad, float pitchRad) {
         // Spherical to Cartesian conversion
-        float x = (float)(radius * Math.cos(pitchRad) * Math.sin(yawRad));
-        float y = (float)(radius * Math.sin(pitchRad));
-        float z = (float)(radius * Math.cos(pitchRad) * Math.cos(yawRad));
+        float x = (float) (radius * Math.cos(pitchRad) * Math.sin(yawRad));
+        float y = (float) (radius * Math.sin(pitchRad));
+        float z = (float) (radius * Math.cos(pitchRad) * Math.cos(yawRad));
 
         Vector3f newCameraPos = new Vector3f(x, y, z).add(cameraTarget);
-
         setCameraPosition(newCameraPos);
     }
 
@@ -106,15 +121,15 @@ public final class PsxForwardRenderer implements Renderer {
 
         // Set up framebuffer resize callback
         glfwSetFramebufferSizeCallback(window, (_, width, height) -> {
-            fbWidth  = width;
+            fbWidth = width;
             fbHeight = height;
             glViewport(0, 0, width, height);
         });
-        try ( MemoryStack stack = MemoryStack.stackPush() ) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             glfwGetFramebufferSize(window, w, h);
-            fbWidth  = w.get(0);
+            fbWidth = w.get(0);
             fbHeight = h.get(0);
         }
 
@@ -123,7 +138,7 @@ public final class PsxForwardRenderer implements Renderer {
                 .vertexFromResource("shaders/psx.vert")
                 .fragmentFromResource("shaders/psx.frag")
                 .build();
-                
+
         // Load debug shader for simple colored primitives
         debugShader = Shader.builder("debug")
                 .vertexFromResource("shaders/debug.vert")
@@ -135,16 +150,16 @@ public final class PsxForwardRenderer implements Renderer {
     }
 
     private void initView() {
-        cameraPos = new Vector3f(0,2,5);
+        cameraPos = new Vector3f(0, 2, 5);
         cameraTarget = new Vector3f(0, 0, 0);
         up = new Vector3f(0, 1, 0);
         view.identity().lookAt(cameraPos, cameraTarget, up);
     }
 
     private void updateProjection() {
-        float aspect = (float)fbWidth / fbHeight;
+        float aspect = (float) fbWidth / fbHeight;
         proj.identity()
-                .perspective((float)Math.toRadians(60), aspect, 0.1f, 100f);
+                .perspective((float) Math.toRadians(60), aspect, 0.1f, 100f);
     }
 
     @Override
@@ -152,11 +167,11 @@ public final class PsxForwardRenderer implements Renderer {
         glViewport(0, 0, fbWidth, fbHeight);
 
         drawQueue.clear();
-        
+
         // We're rendering directly to the default framebuffer now
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         Debug.glCheckError("PsxForwardRenderer.beginFrame - bind default framebuffer");
-        
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Debug.glCheckError("PsxForwardRenderer.beginFrame - clear");
     }
@@ -172,7 +187,7 @@ public final class PsxForwardRenderer implements Renderer {
         psxShader.setMatrix4f("view", view);
         psxShader.setMatrix4f("projection", proj);
         Debug.glCheckError("PsxForwardRenderer.endFrame - set matrices");
-        
+
         for (DrawCmd cmd : drawQueue) {
             psxShader.setMatrix4f("model", cmd.model);
             cmd.mesh.draw(psxShader);
@@ -180,7 +195,7 @@ public final class PsxForwardRenderer implements Renderer {
         }
         psxShader.unbind();
         Debug.glCheckError("PsxForwardRenderer.endFrame - unbind psx shader");
-        
+
         // We're already on the default framebuffer
     }
 
@@ -197,12 +212,12 @@ public final class PsxForwardRenderer implements Renderer {
     }
 
     @Override
-    public void destroy() { 
+    public void destroy() {
         psxShader.cleanup();
         if (debugShader != null) {
             debugShader.cleanup();
         }
-        
+
         // Clean up framebuffer resources if they were created
         if (lowResFbo != 0) {
             glDeleteFramebuffers(lowResFbo);
@@ -214,5 +229,45 @@ public final class PsxForwardRenderer implements Renderer {
             glDeleteRenderbuffers(depthRb);
         }
         Debug.glCheckError("PsxForwardRenderer.destroy");
+    }
+
+    @Override
+    public void setRight(boolean pressed) {
+        this.right = pressed;
+    }
+
+    @Override
+    public void keyboardMove(float deltaTime) {
+        Vector3f moveVector = new Vector3f();
+
+        if (left)
+            moveVector.sub(new Vector3f(front).cross(up).normalize());
+        if (right)
+            moveVector.add(new Vector3f(front).cross(up).normalize());
+        if (forward)
+            moveVector.add(new Vector3f(front));
+        if (backward)
+            moveVector.sub(new Vector3f(front));
+
+        if (!moveVector.equals(new Vector3f(0, 0, 0))) {
+            moveVector.normalize().mul(player.getSpeed() * deltaTime);
+            cameraPos.add(moveVector);
+            player.move(moveVector);
+        }
+    }
+
+    @Override
+    public void setBackward(boolean pressed) {
+        this.backward = pressed;
+    }
+
+    @Override
+    public void setLeft(boolean pressed) {
+        this.left = pressed;
+    }
+
+    @Override
+    public void setForward(boolean pressed) {
+        this.forward = pressed;
     }
 }

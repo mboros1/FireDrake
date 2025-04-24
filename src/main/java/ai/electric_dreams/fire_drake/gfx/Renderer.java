@@ -13,6 +13,8 @@ public interface Renderer {
 
     void draw(Mesh testTriangle);
 
+    Vector3f getCameraTarget();
+
     void setPlayer(Entity player);
 
     int getFbWidth();
@@ -25,4 +27,16 @@ public interface Renderer {
     void gameToCameraUpdates(float radius, float yawRad, float pitchRad);
 
     Vector3f getCameraPos();
+
+    void setCameraTarget(Vector3f worldCenter);
+
+    void setForward(boolean pressed);
+
+    void setLeft(boolean pressed);
+
+    void setBackward(boolean pressed);
+
+    void setRight(boolean pressed);
+
+    void keyboardMove(float deltaTime);
 }

@@ -7,9 +7,11 @@ import org.joml.Vector3f;
  * Represents a visible entity in the game world.
  */
 public class Entity {
-    private Mesh mesh;
-    private Material material;
+    private final Mesh mesh;
+    private final Material material;
     private Matrix4f transform;
+    private Vector3f meshCenter = null;
+    private float speed = 5.0f;
 
     public Entity(Mesh mesh, Material material, Matrix4f transform) {
         this.mesh = mesh;
@@ -18,8 +20,10 @@ public class Entity {
     }
 
     public Vector3f getWorldCenter() {
-        Vector3f localCenter = mesh.getCenter();
-        return transform.transformPosition(localCenter);
+        if (meshCenter == null) {
+            meshCenter = mesh.getCenter();
+        }
+        return transform.transformPosition(meshCenter);
     }
 
 
@@ -38,4 +42,12 @@ public class Entity {
     public void setTransform(Matrix4f transform) {
         this.transform = transform;
     }
-} 
+
+    public void move(Vector3f delta) {
+        transform.translate(delta);
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+}

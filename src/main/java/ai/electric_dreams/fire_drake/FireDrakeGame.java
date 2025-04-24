@@ -9,11 +9,15 @@ import ai.electric_dreams.fire_drake.window.GlfwWindow;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
+
+import static ai.electric_dreams.fire_drake.gfx.Time.getDeltaTime;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class FireDrakeGame {
 	private static final Logger logger = LoggerFactory.getLogger(FireDrakeGame.class);
@@ -27,9 +31,8 @@ public class FireDrakeGame {
 	private Renderer renderer;
 	private World world;
 	private boolean showPopupWindow = false;
-	private ObjMesh dragonMesh;
 
-	// Camera controls
+    // Camera controls
 	private boolean leftMouseDown = false;
 	private double lastMouseX = -1;
 	private double lastMouseY = -1;
@@ -79,7 +82,7 @@ public class FireDrakeGame {
 		// Initialize game world
 		world = new World();
 
-		dragonMesh = new ObjMesh("fire_drake.obj");
+        ObjMesh dragonMesh = new ObjMesh("fire_drake.obj");
 		dragonMesh.reportObjStats();
 		Matrix4f model = new Matrix4f()
 				.translate(0, -1, -5)   // move it down 1 unit and back 5 units
@@ -92,6 +95,18 @@ public class FireDrakeGame {
 		world.addEntity(triangleEntity);
 
 		initMouseCallbacks(windowHandle);
+
+		// keyboard callbacks, TODO: maybe move it to a method later
+		GLFW.glfwSetKeyCallback(windowHandle, (window, key, scancode, action, mods) -> {
+			boolean pressed = action != GLFW_RELEASE;
+			switch (key) {
+				case GLFW_KEY_W -> renderer.setForward(pressed);
+				case GLFW_KEY_A -> renderer.setLeft(pressed);
+				case GLFW_KEY_S -> renderer.setBackward(pressed);
+				case GLFW_KEY_D -> renderer.setRight(pressed);
+				// ... other keys ...
+			}
+		});
 
 		// Make the window visible
 		windowSystem.show();
@@ -140,11 +155,16 @@ public class FireDrakeGame {
 		renderer.setPlayer(dragonEntity);
 
 		// Get a test mesh for rendering
-		 var testTriangle = DefaultDebugMeshes.defaultTriangle();
+		var testTriangle = DefaultDebugMeshes.defaultTriangle();
 
 		// Main loop
+		Time.reset();
 		while (!windowSystem.shouldClose()) {
+			float deltaTime = getDeltaTime();
 			org.lwjgl.glfw.GLFW.glfwPollEvents();
+
+			renderer.keyboardMove(deltaTime);
+
 			float radius = zoom;
 			float yawRad = (float)Math.toRadians(yaw);
 			float pitchRad = (float)Math.toRadians(pitch);
@@ -160,7 +180,7 @@ public class FireDrakeGame {
 				renderer.draw(e.mesh(), e.material(), e.transform());
 			}
 			// TEMPORARY: show test triangle
-			 renderer.draw(testTriangle);
+			renderer.draw(testTriangle);
 			renderer.endFrame();
 
 			// ImGui rendering
@@ -219,6 +239,10 @@ public class FireDrakeGame {
 					" %6.2f %6.2f %6.2f",
 					cameraPos.x, cameraPos.y, cameraPos.z
 			));
+			ImGui.separator();
+
+			ImGui.text("Zoom: " + zoom);
+
 			ImGui.separator();
 
 			float distance = cameraPos.distance(dragonPos);
