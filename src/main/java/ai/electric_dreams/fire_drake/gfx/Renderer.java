@@ -2,6 +2,7 @@ package ai.electric_dreams.fire_drake.gfx;
 
 import ai.electric_dreams.fire_drake.gfx.mesh.EasyMesh;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public interface Renderer {
     void init(long windowHandle);
@@ -22,4 +23,6 @@ public interface Renderer {
     Matrix4f getProj();
 
     void gameToCameraUpdates(float radius, float yawRad, float pitchRad);
+
+    Vector3f getCameraPos();
 }

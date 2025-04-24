@@ -33,6 +33,11 @@ public final class PsxForwardRenderer implements Renderer {
     private Entity player;
 
     @Override
+    public Vector3f getCameraPos() {
+        return cameraPos;
+    }
+
+    @Override
     public void setPlayer(Entity player) {
         this.player = player;
         cameraTarget = player.getWorldCenter();

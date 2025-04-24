@@ -205,6 +205,23 @@ public class FireDrakeGame {
 			}
 			ImGui.separator();
 
+			ImGui.text("Dragon Position:");
+			var dragonPos = dragonEntity.getWorldCenter();
+			ImGui.text(String.format(
+					" %6.2f %6.2f %6.2f",
+					dragonPos.x, dragonPos.y, dragonPos.z
+			));
+			ImGui.separator();
+
+			var cameraPos = renderer.getCameraPos();
+			ImGui.text("Camera Position:");
+			ImGui.text(String.format(
+					" %6.2f %6.2f %6.2f",
+					cameraPos.x, cameraPos.y, cameraPos.z
+			));
+
+
+
 			ImGui.end();
 
 			// Popup window if enabled
