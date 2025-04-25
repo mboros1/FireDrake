@@ -11,7 +11,7 @@ public class Entity {
     private final Material material;
     private Matrix4f transform;
     private Vector3f meshCenter = null;
-    private float speed = 5.0f;
+    private float speed = 25.0f;
 
     public Entity(Mesh mesh, Material material, Matrix4f transform) {
         this.mesh = mesh;
